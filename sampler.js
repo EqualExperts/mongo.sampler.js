@@ -1,7 +1,7 @@
-count = 10000;
+DEFAULT_COUNT = 10000;
 
 print("sampler will obtain samples of documents with differing schemas and save these to a database called 'sampler'");
-print("Usage: mongo db --eval=\"databaseName='databaseName'; collectionName='collectionName'; count=num\" sampler.js");
+print("Usage: mongo db --eval=\"databaseName='databaseName'; collectionName='collectionName'; count=num\" sampler.js\n");
 
 if (!databaseName) {
     print("Please specify a database name to sample");
@@ -21,12 +21,18 @@ function getProperties(forDocument) {
     return propertiesList;
 }
 
+function cleanUpSamples(fromCollectionName) {
+    db.getSiblingDB("sampler").getCollection(fromCollectionName).remove({});
+}
+
 function saveSampleDocument(document, toCollectionName) {
     db.getSiblingDB("sampler").getCollection(toCollectionName).insert(document);
 }
 
 SamplerSet = function(databaseAndCollectionName) {
     this.databaseAndCollectionName = databaseAndCollectionName;
+    cleanUpSamples(databaseAndCollectionName);
+
     this.documentSchemaProperties = [];
 };
 
@@ -48,9 +54,14 @@ SamplerSet.prototype.push = function(doc) {
     }
 }
 
+var countLimit = count || DEFAULT_COUNT;
+countLimit = Math.abs(countLimit);
+
+print("Sampling upto " + countLimit + " documents from " + databaseName + " and collection " + collectionName);
+
 var mySamplerSet = new SamplerSet(databaseName + "." + collectionName);
 
-sample(databaseName, collectionName, Math.abs(count));
+sample(databaseName, collectionName, countLimit);
 
 function sample(databaseName, collectionName, count) {
     var cursor = db.getSiblingDB(databaseName).getCollection(collectionName).find().limit(count);
