@@ -13,16 +13,39 @@ if (!collectionName) {
     return;
 }
 
+function getProperties(forDocument) {
+    var propertiesList = [];
+    for (prop in forDocument) {
+        propertiesList.push(prop);
+    }
+    return propertiesList;
+}
+
 SamplerSet = function() {
+    this.documentSchemaProperties = [];
     this.uniqueSchemaDocuments = [];
 };
 
 SamplerSet.prototype.push = function(doc) {
-    this.uniqueSchemaDocuments.push(doc);
+    var docProperties = getProperties(doc);
+
+    var doesNotHaveProperties = false;
+    var notAddedDocument = true;
+    for (prop in docProperties) {
+        doesNotHaveProperties = (this.documentSchemaProperties.indexOf(prop) == -1);
+        if (doesNotHaveProperties) {
+            this.documentSchemaProperties.push(prop); //Update the list of properties
+
+            if (notAddedDocument) {
+                this.uniqueSchemaDocuments.push(doc); //Accumulate the document as having some schema differences
+                notAddedDocument = false;
+            }
+        }
+    }
 }
 
 SamplerSet.prototype.printSamples = function() {
-    print(this.uniqueSchemaDocuments);
+    this.uniqueSchemaDocuments.forEach(printjson);
 }
 
 var mySamplerSet = new SamplerSet();
@@ -35,14 +58,6 @@ function sample(databaseName, collectionName, count) {
 
     while (cursor.hasNext()) {
         var doc = cursor.next();
-        mySamplerSet.push(getProperties(doc));
+        mySamplerSet.push(doc);
     }
-}
-
-function getProperties(forDocument) {
-    var propertiesList = [];
-    for (prop in forDocument) {
-        propertiesList.push(prop);
-    }
-    return propertiesList;
 }
