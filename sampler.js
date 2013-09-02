@@ -21,37 +21,36 @@ function getProperties(forDocument) {
     return propertiesList;
 }
 
-SamplerSet = function() {
+function saveSampleDocument(document, toCollectionName) {
+    db.getSiblingDB("sampler").getCollection(toCollectionName).insert(document);
+}
+
+SamplerSet = function(databaseAndCollectionName) {
+    this.databaseAndCollectionName = databaseAndCollectionName;
     this.documentSchemaProperties = [];
-    this.uniqueSchemaDocuments = [];
 };
 
 SamplerSet.prototype.push = function(doc) {
     var docProperties = getProperties(doc);
 
     var doesNotHaveProperties = false;
-    var notAddedDocument = true;
+    var notSavedSampleDocument = true;
     for (prop in docProperties) {
         doesNotHaveProperties = (this.documentSchemaProperties.indexOf(prop) == -1);
         if (doesNotHaveProperties) {
             this.documentSchemaProperties.push(prop); //Update the list of properties
 
-            if (notAddedDocument) {
-                this.uniqueSchemaDocuments.push(doc); //Accumulate the document as having some schema differences
-                notAddedDocument = false;
+            if (notSavedSampleDocument) {
+                saveSampleDocument(doc, this.databaseAndCollectionName); //Save the document as a sample
+                notSavedSampleDocument = false;
             }
         }
     }
 }
 
-SamplerSet.prototype.printSamples = function() {
-    this.uniqueSchemaDocuments.forEach(printjson);
-}
-
-var mySamplerSet = new SamplerSet();
+var mySamplerSet = new SamplerSet(databaseName + "." + collectionName);
 
 sample(databaseName, collectionName, Math.abs(count));
-mySamplerSet.printSamples();
 
 function sample(databaseName, collectionName, count) {
     var cursor = db.getSiblingDB(databaseName).getCollection(collectionName).find().limit(count);
