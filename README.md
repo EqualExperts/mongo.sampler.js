@@ -14,6 +14,7 @@ You can specify a limit in terms of the number of documents it will look through
 
 sampler will copy these documents over to a database called 'sampler' into a collection named as 'x.y',
 where x is the database name, and y is the collection name.
+It will clear out this collection in 'sampler' before each run.
 
 #TODO
 Run sampler from your mongo prompt as:
