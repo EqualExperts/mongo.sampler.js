@@ -1,7 +1,9 @@
 Run sampler on your mongo database and it will find one of each kind of document in a collection.
 
 Run it as a script supplied to your mongo client as:
+<pre>
 $ mongo db --eval="db='databaseName'; collection='collectionName'; count=num" sampler.js
+</pre>
 
 Note that a difference in schema can be one or more of the following:
 * a difference in properties
@@ -18,7 +20,13 @@ It will clear out this collection in 'sampler' before each run.
 
 #TODO
 Run sampler from your mongo prompt as:
-mongo> sample(databaseName, collectionName, [countOfDocuments])
+<pre>
+$ mongo
+MongoDB shell version: 2.4.1
+connecting to: test
+> sample(databaseName, collectionName, [countOfDocuments])
+
+</pre>
 
 !!! NOTE !!!
 sampler will not write to any database other than one called 'sampler'.
